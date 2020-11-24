@@ -4,8 +4,6 @@ import torch
 from torch.utils.data import Dataset
 from skimage import io
 
-# random comment
-
 class PrepareDataset(Dataset):
     def __init__(self, csv_file, root_dir, transform=None):
         self.annotations = pd.read_csv(csv_file)
@@ -22,3 +20,5 @@ class PrepareDataset(Dataset):
 
         if self.transform:
             image = self.transform(image)
+
+        return (image, y_label)
