@@ -9,6 +9,8 @@ import torch.nn as nn               # neural network
 import torch.nn.functional as F
 import torch.optim as optim         # loss function and optimizer
 
+from Customized_dataset.customDataset import PrepareDataset
+
 # 1. Load and normalize CIFAR10
 transform = transforms.Compose(
     [transforms.ToTensor(),
