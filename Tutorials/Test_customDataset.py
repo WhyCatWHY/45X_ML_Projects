@@ -1,6 +1,7 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
+# from torch.utils.data import
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,13 +10,15 @@ import torch.nn as nn               # neural network
 import torch.nn.functional as F
 import torch.optim as optim         # loss function and optimizer
 
-#from Customized_dataset.customDataset import PrepareDataset
 
-#image_object = PrepareDataset(csv_file='cats_dogs.csv',root_dir='E:\cheny\PycharmProjects\45X_ML_Projects\Customized_dataset',transform=transforms.ToTensor())
+from Customized_dataset.customDataset import PrepareDataset
 
-#for i in range(image_object.__len__()):
-#    image, y_label = image_object.__getitem__(i)
-#    # do stuff with image adn y_label
+image_object = PrepareDataset(csv_file='cats_dogs.csv',root_dir='E:\cheny\PycharmProjects\45X_ML_Projects\Customized_dataset',transform=transforms.ToTensor())
+
+for i in range(image_object.__len__()):
+    image, y_label = image_object.__getitem__(i)
+    # do stuff with image adn y_label
+train_set, test_Set = torch.utils.data.random_split(image_object, [20000, 5000])
 
 # 1. Load and normalize CIFAR10
 transform = transforms.Compose(
