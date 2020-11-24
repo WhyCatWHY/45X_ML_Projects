@@ -10,33 +10,41 @@ import torch.nn as nn               # neural network
 import torch.nn.functional as F
 import torch.optim as optim         # loss function and optimizer
 
-
 from Customized_dataset.customDataset import PrepareDataset
 
-image_object = PrepareDataset(csv_file='cats_dogs.csv',root_dir='E:\cheny\PycharmProjects\45X_ML_Projects\Customized_dataset',transform=transforms.ToTensor())
+#
+batch_size = 32
+
+# 1.A Load data from customized dataset
+image_object = PrepareDataset(csv_file='cats_dogs.csv',
+                              root_dir=r'E:\cheny\PycharmProjects\45X_ML_Projects\Customized_dataset\cats_dogs_resized',
+                              transform=transforms.ToTensor())
+
+trainset, testset = torch.utils.data.random_split(image_object, [20000, 5000])
+trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_size=batch_size, shuffle=True)
+testloader = torch.utils.data.DataLoader(dataset=testset, batch_size=batch_size, shuffle=True)
+classes = ('cat', 'dog')
 
 for i in range(image_object.__len__()):
-    image, y_label = image_object.__getitem__(i)
-    # do stuff with image adn y_label
-train_set, test_Set = torch.utils.data.random_split(image_object, [20000, 5000])
+    images, labels = image_object.__getitem__(i)
+    #do stuff with image and y_label
 
 # 1. Load and normalize CIFAR10
-transform = transforms.Compose(
-    [transforms.ToTensor(),
-     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+# transform = transforms.Compose(
+#     [transforms.ToTensor(),
+#      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+# trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
+#                                         download=True, transform=transform)
+# trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
+#                                           shuffle=True, num_workers=0) # broken pipe err, set num_workers = 0
+#
+# testset = torchvision.datasets.CIFAR10(root='./data', train=False,
+#                                        download=True, transform=transform)
+# testloader = torch.utils.data.DataLoader(testset, batch_size=4,
+#                                          shuffle=False, num_workers=0) # changed from 2 to 0. prev runtime err
 
-trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                        download=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-                                          shuffle=True, num_workers=0) # broken pipe err, set num_workers = 0
-
-testset = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                       download=True, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=4,
-                                         shuffle=False, num_workers=0) # changed from 2 to 0. prev runtime err
-
-classes = ('plane', 'car', 'bird', 'cat',
-           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+# classes = ('plane', 'car', 'bird', 'cat',
+#            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # functions to show an image
 def imshow(img):
@@ -45,9 +53,9 @@ def imshow(img):
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
 
-# get some random training images
-dataiter = iter(trainloader)
-images, labels = dataiter.next()
+# # get some random training images
+# dataiter = iter(trainloader)
+# images, labels = dataiter.next()
 
 # print labels
 print(' '.join('%5s' % classes[labels[j]] for j in range(4)))
