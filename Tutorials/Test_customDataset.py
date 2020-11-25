@@ -11,22 +11,21 @@ import torch.nn.functional as F
 import torch.optim as optim         # loss function and optimizer
 
 from Customized_dataset.customDataset import PrepareDataset
-
 #
-batch_size = 32
+batch_size = 1
 
 # 1.A Load data from customized dataset
-image_object = PrepareDataset(csv_file='cats_dogs.csv',
-                              root_dir=r'E:\cheny\PycharmProjects\45X_ML_Projects\Customized_dataset\cats_dogs_resized',
+image_object = PrepareDataset(csv_file=r'E:\cheny\PycharmProjects\45X_ML_Projects\Customized_dataset\fire_data.csv',
+                              root_dir=r'E:\cheny\PycharmProjects\45X_ML_Projects\Customized_dataset\fire_dataset',
                               transform=transforms.ToTensor())
 
-trainset, testset = torch.utils.data.random_split(image_object, [20000, 5000])
+trainset, testset = torch.utils.data.random_split(image_object, [round(0.8*len(image_object)), len(image_object)-round(0.8*len(image_object))])
 trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_size=batch_size, shuffle=True)
 testloader = torch.utils.data.DataLoader(dataset=testset, batch_size=batch_size, shuffle=True)
-classes = ('cat', 'dog')
+classes = ('fire', 'non-fire')
 
-for i in range(image_object.__len__()):
-    images, labels = image_object.__getitem__(i)
+# for i in range(image_object.__len__()):
+#     images, labels = image_object.__getitem__(i)
     #do stuff with image and y_label
 
 # 1. Load and normalize CIFAR10
@@ -53,12 +52,12 @@ def imshow(img):
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
 
-# # get some random training images
-# dataiter = iter(trainloader)
-# images, labels = dataiter.next()
+# get some random training images
+dataiter = iter(trainloader)
+images, labels = dataiter.next()
 
 # print labels
-print(' '.join('%5s' % classes[labels[j]] for j in range(4)))
+print(' '.join('%5s' % classes[labels[j]] for j in range(batch_size)))
 # show images
 imshow(torchvision.utils.make_grid(images))
 
@@ -66,21 +65,29 @@ imshow(torchvision.utils.make_grid(images))
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.conv1 = nn.Conv2d(3, 6, 5) # 3 input image channel, 6 output channels, 5x5 square convolution
         self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.conv2 = nn.Conv2d(6, 16, 5) # 6 input image channel, 16 output channels, 5x5 square convolution
+        self.fc1 = nn.Linear(16 * 5 * 5, 120) # 5*5 from image dimension
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
+        #x = x.view(-1, 16 * 5 * 5)
+        x = x.view(-1, self.num_flat_features(x))
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
+    def num_flat_features(self, x):
+        size = x.size()[1:]  # all dimensions except the batch dimension
+        num_features = 1
+        for s in size:
+            num_features *= s
+        return num_features
 
 net = Net()
 
@@ -98,7 +105,6 @@ for epoch in range(1):  # loop over the dataset multiple times
 
         # zero the parameter gradients
         optimizer.zero_grad()
-
         # forward + backward + optimize
         outputs = net(inputs)
         loss = criterion(outputs, labels)
@@ -122,7 +128,7 @@ torch.save(net.state_dict(), PATH)
 dataiter = iter(testloader)
 images, labels = dataiter.next()
 # print images
-print('GroundTruth: ', ' '.join('%5s' % classes[labels[j]] for j in range(4)))
+print('GroundTruth: ', ' '.join('%5s' % classes[labels[j]] for j in range(batch_size)))
 imshow(torchvision.utils.make_grid(images))
 
 net = Net()
