@@ -1,4 +1,4 @@
-import version as version
+import version
 from setuptools import setup, find_packages
 
 setup(
